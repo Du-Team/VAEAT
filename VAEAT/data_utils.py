@@ -3,7 +3,48 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
 
-def proprocess(df):
+def average_filter(values, n=3):
+    if n >= len(values):
+        n = len(values)
+
+    res = np.cumsum(values, dtype=float)
+    res[n:] = res[n:] - res[:-n]
+    res[n:] = res[n:] / n
+
+    for i in range(1, n):
+        res[i] /= (i + 1)
+
+    return res
+
+
+def spectral_residual_transform(values):
+    EPS = 1e-8
+
+    trans = np.fft.fft(values)
+    mag = np.sqrt(trans.real ** 2 + trans.imag ** 2)
+    eps_index = np.where(mag <= EPS)[0]
+    mag[eps_index] = EPS
+
+    mag_log = np.log(mag)
+    mag_log[eps_index] = 0
+
+    spectral = np.exp(mag_log - average_filter(mag_log, n=3))
+
+    trans.real = trans.real * spectral / mag
+    trans.imag = trans.imag * spectral / mag
+    trans.real[eps_index] = 0
+    trans.imag[eps_index] = 0
+
+    wave_r = np.fft.ifft(trans)
+    mag = np.sqrt(wave_r.real ** 2 + wave_r.imag ** 2)
+    return mag
+
+
+def proprocess(wdim, df, srt=False):
+    if srt == True:
+        for i in range(wdim):
+            df[:, i] = spectral_residual_transform(df[:, i])
+
     df = np.asarray(df, dtype=np.float32)
 
     if len(df.shape) == 1:
@@ -29,7 +70,7 @@ def read_train_data(seq_length, file='', step=1, valid_portition=0.3):
 
     (whole_len, whole_dim) = df.shape
 
-    values = proprocess(df)  #
+    values = proprocess(whole_dim, df, srt=False)  #
 
     n = int(len(values) * valid_portition)
 
@@ -89,7 +130,7 @@ def read_test_data(seq_length, file=''):
 
     (whole_len, whole_dim) = df.shape
 
-    test = proprocess(df)
+    test = proprocess(whole_dim, df, srt=False)
 
     num_samples_test = (test.shape[0] - seq_length) + 1
 
