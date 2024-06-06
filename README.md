@@ -33,6 +33,7 @@ http://itrust.sutd.edu.sg/research/dataset
 python main.py <dataset>
 ```
 
+```
 where `<dataset>` is one of `SMAP`, `MSL`, `SMD`, `SWAT`, `PSM`
 
 @article{HE2024120852,
@@ -43,3 +44,4 @@ volume = {676},
 pages = {120852},
 year = {2024}
 }
+```
