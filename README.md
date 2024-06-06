@@ -32,9 +32,8 @@ http://itrust.sutd.edu.sg/research/dataset
 ```
 python main.py <dataset>
 ```
-
-```
 where `<dataset>` is one of `SMAP`, `MSL`, `SMD`, `SWAT`, `PSM`
+```
 
 @article{HE2024120852,
 title = {VAEAT: Variational AutoeEncoder with adversarial training for multivariate time series anomaly detection},
